@@ -29,10 +29,13 @@ public:
 private:
 	CGrPtr<CGrObject> m_scene;
 	CGrCamera m_camera;
-
+	BYTE** m_rayimage = nullptr;
+	int         m_rayimagewidth;
+	int         m_rayimageheight;
 // Implementation
 public:
 	virtual ~CChildView();
+	void ConfigureRenderer(CGrRenderer* p_renderer);
 	virtual void OnGLDraw(CDC* pDC);
 
 	// Generated message map functions
@@ -42,5 +45,8 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	bool m_raytrace;
+	afx_msg void OnRenderRaytrace();
+	afx_msg void OnUpdateRenderRaytrace(CCmdUI* pCmdUI);
 };
 

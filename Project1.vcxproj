@@ -184,6 +184,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ChildView.h" />
+    <ClInclude Include="CMyRaytraceRenderer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="graphics\GrCamera.h" />
     <ClInclude Include="graphics\GrObject.h" />
@@ -201,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildView.cpp" />
+    <ClCompile Include="CMyRaytraceRenderer.cpp" />
     <ClCompile Include="graphics\GrCamera.cpp" />
     <ClCompile Include="graphics\GrObject.cpp" />
     <ClCompile Include="graphics\GrRenderer.cpp" />
