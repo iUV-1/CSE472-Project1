@@ -1,0 +1,57 @@
+# --- Visual Studio Temporary Files ---
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+build/
+bin/
+obj/
+
+# Visual Studio 2017/2019/2022 cache and logs
+.vs/
+*.VC.db
+*.VC.opendb
+
+# --- MFC/C++ Specifics ---
+# Precompiled header files
+*.pch
+
+# Intermediate files
+*.obj
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.rsp
+*.pgc
+*.pgd
+*.meta
+*.tlog
+*.unsuccessfulbuild
+*.lastbuildstate
+
+# Resource compiler cached resources
+*.res
+*.aps
+*.rc2.res
+
+# --- Static Analysis & Browsing ---
+*.sdf
+*.ipch
+*.vc.db
+*.vc.opendb
+
+# --- External Tools & Clean up ---
+*.log
+*.tlog
+*.lastbuildstate
