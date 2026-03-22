@@ -194,6 +194,7 @@
     <ClInclude Include="graphics\GrTransform.h" />
     <ClInclude Include="graphics\OpenGLRenderer.h" />
     <ClInclude Include="graphics\OpenGLWnd.h" />
+    <ClInclude Include="graphics\RayIntersection.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Project1.h" />
@@ -228,6 +229,9 @@
   <ItemGroup>
     <Image Include="res\Project1.ico" />
     <Image Include="res\Toolbar.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="graphics\libRayIntersection.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

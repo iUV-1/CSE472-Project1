@@ -63,6 +63,9 @@
     <ClInclude Include="CMyRaytraceRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="graphics\RayIntersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Project1.cpp">
@@ -119,5 +122,8 @@
     <Image Include="res\Toolbar.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="graphics\libRayIntersection.lib" />
   </ItemGroup>
 </Project>
