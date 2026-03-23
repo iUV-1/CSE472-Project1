@@ -3,7 +3,6 @@
 // Description :  Header file for CGrRenderer, superclass for generic renderer.
 //                See GrRenderer.cpp
 // Author :       Charles B. Owen
-// Last modified: 2026
 //
 
 

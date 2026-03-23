@@ -3,7 +3,7 @@
 // Description :   Header file for COpenGLWnd OpenGL superclass.
 // Documentation : See OpenGLWnd.cpp
 // Author :        Charles B. Owen
-// Modification:   Jan 12, 25 - Y.T.
+// Modification:   Jan 12, 19 - Y.T.
 //
 
 #pragma once
