@@ -56,6 +56,39 @@ void AddSphere(CGrComposite* comp, double cx, double cy, double cz, double r, in
     }
 }
 
+void CreateSunsetTexture(CGrTexture* texture)
+{
+    const int w = 256;
+    const int h = 256;
+    texture->SetSize(w, h);
+
+    for (int y = 0; y < h; y++)
+    {
+        double t = double(y) / double(h - 1);
+        int r = int(255.0 - 35.0 * t);
+        int g = int(170.0 - 120.0 * t);
+        int b = int(40.0 + 170.0 * t);
+
+        for (int x = 0; x < w; x++)
+        {
+            texture->Set(x, y, r, g, b);
+        }
+    }
+}
+
+void AddLetterC(CGrComposite* comp, double x, double y, double z, double scale, double depth, CGrTexture* texture = nullptr)
+{
+    auto stroke = [=](double sx, double sy, double w, double h)
+    {
+        comp->Box(x + sx * scale, y + sy * scale, z, w * scale, h * scale, depth, texture);
+    };
+
+    // block-style 3D letter C
+    stroke(0.0, 0.0, 1.2, 8.0);   // left vertical
+    stroke(0.0, 6.8, 5.5, 1.2);   // top bar
+    stroke(0.0, 0.0, 5.5, 1.2);   // bottom bar
+}
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -114,6 +147,22 @@ CChildView::CChildView()
 
     // AddSphere(comp, cx, cy, cz, r, slices, stacks, texture)
     AddSphere(spherecomp, -4, 2, 8, 4, 30, 30, worldmap);
+
+    // A 3D letter C
+    CGrPtr<CGrMaterial> cpaint = new CGrMaterial;
+    cpaint->AmbientAndDiffuse(0.9f, 0.85f, 0.2f);
+    cpaint->Specular(0.6f, 0.6f, 0.6f);
+    cpaint->Shininess(45.0f);
+    scene->Child(cpaint);
+
+    CGrPtr<CGrComposite> cletter = new CGrComposite;
+    cpaint->Child(cletter);
+    CGrPtr<CGrTexture> sunset = new CGrTexture;
+    if (!sunset->LoadFile(L"textures/sunset.bmp"))
+    {
+        CreateSunsetTexture(sunset);
+    }
+    AddLetterC(cletter, 9.0, -8.0, 5.0, 1.0, 1.2, sunset);
 
     // Provide a massive floor slightly beneath both boxes to catch their shadows safely!
     //CGrPtr<CGrMaterial> floorpaint = new CGrMaterial;
