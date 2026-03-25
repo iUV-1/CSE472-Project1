@@ -140,9 +140,58 @@ bool CMyRaytraceRenderer::RendererEnd()
 
                 if (material != NULL)
                 {
-                    m_rayimage[r][c * 3] = BYTE(material->Diffuse(0) * 255);
-                    m_rayimage[r][c * 3 + 1] = BYTE(material->Diffuse(1) * 255);
-                    m_rayimage[r][c * 3 + 2] = BYTE(material->Diffuse(2) * 255);
+                    double color[3] = { 0.0, 0.0, 0.0 };
+
+                    // View vector V: from intersect to eye (which is at 0,0,0)
+                    CGrPoint V = Normalize3(-intersect);
+
+                    // Iterate over all lights
+                    for (int i = 0; i < LightCnt(); i++)
+                    {
+                        const Light& light = GetLight(i);
+                        
+                        // Add light's ambient component
+                        color[0] += material->Ambient(0) * light.m_ambient[0];
+                        color[1] += material->Ambient(1) * light.m_ambient[1];
+                        color[2] += material->Ambient(2) * light.m_ambient[2];
+
+                        CGrPoint L;
+                        if (light.m_pos.W() == 0.0) {
+                            // Directional light
+                            L = Normalize3(light.m_pos);
+                        } else {
+                            // Point light
+                            L = Normalize3(light.m_pos - intersect);
+                        }
+
+                        // Diffuse term
+                        double NdotL = Dot3(N, L);
+                        if (NdotL > 0.0) {
+                            color[0] += material->Diffuse(0) * light.m_diffuse[0] * NdotL;
+                            color[1] += material->Diffuse(1) * light.m_diffuse[1] * NdotL;
+                            color[2] += material->Diffuse(2) * light.m_diffuse[2] * NdotL;
+
+                            // Specular term
+                            CGrPoint H = Normalize3(L + V);
+                            double NdotH = Dot3(N, H);
+                            if (NdotH > 0.0 && material->Shininess() > 0.0) {
+                                double spec = pow(NdotH, material->Shininess());
+                                color[0] += material->Specular(0) * light.m_specular[0] * spec;
+                                color[1] += material->Specular(1) * light.m_specular[1] * spec;
+                                color[2] += material->Specular(2) * light.m_specular[2] * spec;
+                            }
+                        }
+                    }
+
+                    // Clamp to 0-1 and scale to 0-255
+                    for (int i = 0; i < 3; i++) {
+                        if (color[i] > 1.0) color[i] = 1.0;
+                        if (color[i] < 0.0) color[i] = 0.0;
+                    }
+
+                    m_rayimage[r][c * 3] = BYTE(color[0] * 255.0);
+                    m_rayimage[r][c * 3 + 1] = BYTE(color[1] * 255.0);
+                    m_rayimage[r][c * 3 + 2] = BYTE(color[2] * 255.0);
                 }
             }
             else

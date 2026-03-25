@@ -94,6 +94,12 @@ void CChildView::ConfigureRenderer(CGrRenderer* p_renderer)
     p_renderer->AddLight(CGrPoint(1, 0.5, 1.2, 0),
         dim, brightwhite, brightwhite);
 
+    // Add a second light array
+    GLfloat dim2[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    GLfloat secondlight[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+    p_renderer->AddLight(CGrPoint(-1, 0.5, -1.2, 0),
+        dim2, secondlight, secondlight);
+
 }
 BEGIN_MESSAGE_MAP(CChildView, COpenGLWnd)
 	ON_WM_PAINT()
