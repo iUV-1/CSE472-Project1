@@ -89,6 +89,20 @@ void AddLetterC(CGrComposite* comp, double x, double y, double z, double scale, 
     stroke(0.0, 0.0, 5.5, 1.2);   // bottom bar
 }
 
+void AddLetterD(CGrComposite* comp, double x, double y, double z, double scale, double depth, CGrTexture* texture = nullptr)
+{
+    auto stroke = [=](double sx, double sy, double w, double h)
+    {
+        comp->Box(x + sx * scale, y + sy * scale, z, w * scale, h * scale, depth, texture);
+    };
+
+    // block-style 3D letter D
+    stroke(0.0, 0.0, 1.2, 8.0);   // left vertical
+    stroke(0.0, 6.8, 5.5, 1.2);   // top bar
+    stroke(0.0, 0.0, 5.5, 1.2);   // bottom bar
+    stroke(4.3, 1.2, 1.2, 5.6);   // right vertical
+}
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -163,6 +177,23 @@ CChildView::CChildView()
         CreateSunsetTexture(sunset);
     }
     AddLetterC(cletter, 9.0, -8.0, 5.0, 1.0, 1.2, sunset);
+
+    // A 3D letter D with marble10 texture
+    CGrPtr<CGrMaterial> dpaint = new CGrMaterial;
+    dpaint->AmbientAndDiffuse(0.9f, 0.9f, 0.9f);
+    dpaint->Specular(0.55f, 0.55f, 0.55f);
+    dpaint->Shininess(45.0f);
+    scene->Child(dpaint);
+
+    CGrPtr<CGrTexture> marble10 = new CGrTexture;
+    if (!marble10->LoadFile(L"textures/marble10.bmp"))
+    {
+        marble10->LoadFile(L"textures/marble02.bmp");
+    }
+
+    CGrPtr<CGrComposite> dletter = new CGrComposite;
+    dpaint->Child(dletter);
+    AddLetterD(dletter, 16.0, -8.0, 5.0, 1.0, 1.2, marble10);
 
     // Provide a massive floor slightly beneath both boxes to catch their shadows safely!
     //CGrPtr<CGrMaterial> floorpaint = new CGrMaterial;
