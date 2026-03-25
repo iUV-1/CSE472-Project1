@@ -124,113 +124,18 @@ bool CMyRaytraceRenderer::RendererEnd()
             //Construct a Ray
             CRay ray(CGrPoint(0, 0, 0), Normalize3(CGrPoint(x, y, -1, 0)));
 
-            double t;                                   // Will be distance to intersection
-            CGrPoint intersect;                         // Will by x,y,z location of intersection
-            const CRayIntersection::Object* nearest;    // Pointer to intersecting object
-            if (m_intersection.Intersect(ray, 1e20, NULL, nearest, t, intersect))
-            {
-                // We hit something...
-                // Determine information about the intersection
-                CGrPoint N;
-                CGrMaterial* material;
-                CGrTexture* texture;
-                CGrPoint texcoord;
+            double color[3];
+            RayColor(ray, color, 0, NULL);
 
-                m_intersection.IntersectInfo(ray, nearest, t,
-                    N, material, texture, texcoord);
-
-                if (material != NULL)
-                {
-                    double color[3] = { 0.0, 0.0, 0.0 };
-
-                    double baseAmb[3] = { material->Ambient(0), material->Ambient(1), material->Ambient(2) };
-                    double baseDif[3] = { material->Diffuse(0), material->Diffuse(1), material->Diffuse(2) };
-
-                    if (texture != NULL && !texture->Empty())
-                    {
-                        double s = texcoord.X();
-                        double t = texcoord.Y();
-
-                        // Repeat wrapping
-                        s = s - floor(s);
-                        t = t - floor(t);
-
-                        int u = (int)(s * texture->Width());
-                        int v = (int)(t * texture->Height());
-
-                        if (u >= texture->Width()) u = texture->Width() - 1;
-                        if (v >= texture->Height()) v = texture->Height() - 1;
-                        if (u < 0) u = 0;
-                        if (v < 0) v = 0;
-
-                        const BYTE* row = (*texture)[v];
-                        double texR = row[u * 3] / 255.0;
-                        double texG = row[u * 3 + 1] / 255.0;
-                        double texB = row[u * 3 + 2] / 255.0;
-
-                        baseAmb[0] = texR; baseAmb[1] = texG; baseAmb[2] = texB;
-                        baseDif[0] = texR; baseDif[1] = texG; baseDif[2] = texB;
-                    }
-
-                    // View vector V: from intersect to eye (which is at 0,0,0)
-                    CGrPoint V = Normalize3(-intersect);
-
-                    // Iterate over all lights
-                    for (int i = 0; i < LightCnt(); i++)
-                    {
-                        const Light& light = GetLight(i);
-
-                        // Add light's ambient component
-                        color[0] += baseAmb[0] * light.m_ambient[0];
-                        color[1] += baseAmb[1] * light.m_ambient[1];
-                        color[2] += baseAmb[2] * light.m_ambient[2];
-
-                        CGrPoint L;
-                        if (light.m_pos.W() == 0.0) {
-                            // Directional light
-                            L = Normalize3(light.m_pos);
-                        } else {
-                            // Point light
-                            L = Normalize3(light.m_pos - intersect);
-                        }
-
-                        // Diffuse term
-                        double NdotL = Dot3(N, L);
-                        if (NdotL > 0.0) {
-                            color[0] += baseDif[0] * light.m_diffuse[0] * NdotL;
-                            color[1] += baseDif[1] * light.m_diffuse[1] * NdotL;
-                            color[2] += baseDif[2] * light.m_diffuse[2] * NdotL;
-
-                            // Specular term
-                            CGrPoint H = Normalize3(L + V);
-                            double NdotH = Dot3(N, H);
-                            if (NdotH > 0.0 && material->Shininess() > 0.0) {
-                                double spec = pow(NdotH, material->Shininess());
-                                color[0] += material->Specular(0) * light.m_specular[0] * spec;
-                                color[1] += material->Specular(1) * light.m_specular[1] * spec;
-                                color[2] += material->Specular(2) * light.m_specular[2] * spec;
-                            }
-                        }
-                    }
-
-                    // Clamp to 0-1 and scale to 0-255
-                    for (int i = 0; i < 3; i++) {
-                        if (color[i] > 1.0) color[i] = 1.0;
-                        if (color[i] < 0.0) color[i] = 0.0;
-                    }
-
-                    m_rayimage[r][c * 3] = BYTE(color[0] * 255.0);
-                    m_rayimage[r][c * 3 + 1] = BYTE(color[1] * 255.0);
-                    m_rayimage[r][c * 3 + 2] = BYTE(color[2] * 255.0);
-                }
+            // Clamp to 0-1 and scale to 0-255
+            for (int i = 0; i < 3; i++) {
+                if (color[i] > 1.0) color[i] = 1.0;
+                if (color[i] < 0.0) color[i] = 0.0;
             }
-            else
-            {
-                // We hit nothing...
-                m_rayimage[r][c * 3] = 0;
-                m_rayimage[r][c * 3 + 1] = 0;
-                m_rayimage[r][c * 3 + 2] = 0;
-            }
+
+            m_rayimage[r][c * 3] = BYTE(color[0] * 255.0);
+            m_rayimage[r][c * 3 + 1] = BYTE(color[1] * 255.0);
+            m_rayimage[r][c * 3 + 2] = BYTE(color[2] * 255.0);
         }
         if ((r % 50) == 0)
         {
@@ -243,4 +148,147 @@ bool CMyRaytraceRenderer::RendererEnd()
 
 
     return true;
+}
+
+void CMyRaytraceRenderer::RayColor(const CRay& ray, double color[3], int recursionLevel, const CRayIntersection::Object* ignore)
+{
+    // Test ray for intersection
+    double t;                                   // Will be distance to intersection
+    CGrPoint intersect;                         // Will by x,y,z location of intersection
+    const CRayIntersection::Object* nearest;    // Pointer to intersecting object
+    
+    // If(intersection)
+    if (m_intersection.Intersect(ray, 1e20, ignore, nearest, t, intersect))
+    {
+        // Determine for intersection:
+        // intersection point, normal, material, texture color
+        CGrPoint N;
+        CGrMaterial* material;
+        CGrTexture* texture;
+        CGrPoint texcoord;
+
+        m_intersection.IntersectInfo(ray, nearest, t, N, material, texture, texcoord);
+
+        if (material != NULL)
+        {
+            double baseAmb[3] = { material->Ambient(0), material->Ambient(1), material->Ambient(2) };
+            double baseDif[3] = { material->Diffuse(0), material->Diffuse(1), material->Diffuse(2) };
+
+            if (texture != NULL && !texture->Empty())
+            {
+                double s = texcoord.X();
+                double t_c = texcoord.Y();
+
+                // Repeat wrapping
+                s = s - floor(s);
+                t_c = t_c - floor(t_c);
+
+                int u = (int)(s * texture->Width());
+                int v = (int)(t_c * texture->Height());
+
+                if (u >= texture->Width()) u = texture->Width() - 1;
+                if (v >= texture->Height()) v = texture->Height() - 1;
+                if (u < 0) u = 0;
+                if (v < 0) v = 0;
+
+                const BYTE* row = (*texture)[v];
+                double texR = row[u * 3] / 255.0;
+                double texG = row[u * 3 + 1] / 255.0;
+                double texB = row[u * 3 + 2] / 255.0;
+
+                baseAmb[0] = texR; baseAmb[1] = texG; baseAmb[2] = texB;
+                baseDif[0] = texR; baseDif[1] = texG; baseDif[2] = texB;
+            }
+
+            // color = compute-ambient-color
+            color[0] = 0.0; color[1] = 0.0; color[2] = 0.0;
+            for (int i = 0; i < LightCnt(); i++) {
+                const Light& l = GetLight(i);
+                color[0] += baseAmb[0] * l.m_ambient[0];
+                color[1] += baseAmb[1] * l.m_ambient[1];
+                color[2] += baseAmb[2] * l.m_ambient[2];
+            }
+
+            CGrPoint V = Normalize3(-ray.Direction());
+            CGrTransform cameraMat;
+            cameraMat.SetLookAt(Eye().X(), Eye().Y(), Eye().Z(),
+                Center().X(), Center().Y(), Center().Z(),
+                Up().X(), Up().Y(), Up().Z());
+
+            // foreach light
+            for (int i = 0; i < LightCnt(); i++)
+            {
+                const Light& light = GetLight(i);
+                CGrPoint lightPosCamera = cameraMat * light.m_pos;
+
+                CGrPoint L;
+                double maxT;
+                if (light.m_pos.W() == 0.0) {
+                    L = Normalize3(lightPosCamera);
+                    maxT = 1e20;
+                } else {
+                    L = Normalize3(lightPosCamera - intersect);
+                    maxT = Distance(lightPosCamera, intersect);
+                }
+
+                // CRay shadowfeeler
+                CGrPoint N_norm = Normalize3(N);
+                CRay shadowFeeler(intersect + N_norm * 0.05, L); // Increased to 0.05 to prevent 'burnt' shadow acne
+                double shadowT;
+                CGrPoint shadowIntersect;
+                const CRayIntersection::Object* shadowNearest;
+                
+                // if shadowfeeler does not hit anything
+                bool bHit = m_intersection.Intersect(shadowFeeler, maxT, nearest, shadowNearest, shadowT, shadowIntersect);
+                if (!bHit || shadowT >= maxT) {
+                    
+                    // color += compute-diffuse-color-from-light
+                    double NdotL = Dot3(N, L);
+                    if (NdotL > 0.0) {
+                        color[0] += baseDif[0] * light.m_diffuse[0] * NdotL;
+                        color[1] += baseDif[1] * light.m_diffuse[1] * NdotL;
+                        color[2] += baseDif[2] * light.m_diffuse[2] * NdotL;
+
+                        // color += compuer-specular-color-from-light
+                        CGrPoint H = Normalize3(L + V);
+                        double NdotH = Dot3(N, H);
+                        if (NdotH > 0.0 && material->Shininess() > 0.0) {
+                            double spec = pow(NdotH, material->Shininess());
+                            color[0] += material->Specular(0) * light.m_specular[0] * spec;
+                            color[1] += material->Specular(1) * light.m_specular[1] * spec;
+                            color[2] += material->Specular(2) * light.m_specular[2] * spec;
+                        }
+                    }
+                }
+            }
+
+            // Optional recursion for mirror reflections beyond the pseudocode scope
+            if (recursionLevel < 3) {
+                double specWeight[3] = { material->Specular(0), material->Specular(1), material->Specular(2) };
+                if (specWeight[0] > 0.0 || specWeight[1] > 0.0 || specWeight[2] > 0.0) {
+                    CGrPoint D = ray.Direction();
+                    CGrPoint N_norm = Normalize3(N);
+                    double DdotN = Dot3(D, N_norm);
+                    CGrPoint R = Normalize3(D - N_norm * (2.0 * DdotN));
+                    
+                    CRay refRay(intersect, R);
+                    double refColor[3] = { 0.0, 0.0, 0.0 };
+                    
+                    RayColor(refRay, refColor, recursionLevel + 1, nearest);
+                    
+                    color[0] += specWeight[0] * refColor[0];
+                    color[1] += specWeight[1] * refColor[1];
+                    color[2] += specWeight[2] * refColor[2];
+                }
+            }
+        }
+    }
+    // else
+    else
+    {
+        // return background-color
+        color[0] = 0.0;
+        color[1] = 0.0;
+        color[2] = 0.0;
+    }
 }

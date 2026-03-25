@@ -13,6 +13,7 @@ private:
     CGrMaterial* m_material;
     CRayIntersection m_intersection;
     std::list<CGrTransform> m_mstack;
+    void RayColor(const CRay& ray, double color[3], int recursionLevel, const CRayIntersection::Object* ignore);
 public:
     CMyRaytraceRenderer() { }
     // setter
