@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <cmath>
 #include "CMyRaytraceRenderer.h"
+#include "graphics/GrTexture.h"
 
 void CMyRaytraceRenderer::RendererMaterial(CGrMaterial* p_material)
 {
@@ -142,6 +143,35 @@ bool CMyRaytraceRenderer::RendererEnd()
                 {
                     double color[3] = { 0.0, 0.0, 0.0 };
 
+                    double baseAmb[3] = { material->Ambient(0), material->Ambient(1), material->Ambient(2) };
+                    double baseDif[3] = { material->Diffuse(0), material->Diffuse(1), material->Diffuse(2) };
+
+                    if (texture != NULL && !texture->Empty())
+                    {
+                        double s = texcoord.X();
+                        double t = texcoord.Y();
+
+                        // Repeat wrapping
+                        s = s - floor(s);
+                        t = t - floor(t);
+
+                        int u = (int)(s * texture->Width());
+                        int v = (int)(t * texture->Height());
+
+                        if (u >= texture->Width()) u = texture->Width() - 1;
+                        if (v >= texture->Height()) v = texture->Height() - 1;
+                        if (u < 0) u = 0;
+                        if (v < 0) v = 0;
+
+                        const BYTE* row = (*texture)[v];
+                        double texR = row[u * 3] / 255.0;
+                        double texG = row[u * 3 + 1] / 255.0;
+                        double texB = row[u * 3 + 2] / 255.0;
+
+                        baseAmb[0] = texR; baseAmb[1] = texG; baseAmb[2] = texB;
+                        baseDif[0] = texR; baseDif[1] = texG; baseDif[2] = texB;
+                    }
+
                     // View vector V: from intersect to eye (which is at 0,0,0)
                     CGrPoint V = Normalize3(-intersect);
 
@@ -149,11 +179,11 @@ bool CMyRaytraceRenderer::RendererEnd()
                     for (int i = 0; i < LightCnt(); i++)
                     {
                         const Light& light = GetLight(i);
-                        
+
                         // Add light's ambient component
-                        color[0] += material->Ambient(0) * light.m_ambient[0];
-                        color[1] += material->Ambient(1) * light.m_ambient[1];
-                        color[2] += material->Ambient(2) * light.m_ambient[2];
+                        color[0] += baseAmb[0] * light.m_ambient[0];
+                        color[1] += baseAmb[1] * light.m_ambient[1];
+                        color[2] += baseAmb[2] * light.m_ambient[2];
 
                         CGrPoint L;
                         if (light.m_pos.W() == 0.0) {
@@ -167,9 +197,9 @@ bool CMyRaytraceRenderer::RendererEnd()
                         // Diffuse term
                         double NdotL = Dot3(N, L);
                         if (NdotL > 0.0) {
-                            color[0] += material->Diffuse(0) * light.m_diffuse[0] * NdotL;
-                            color[1] += material->Diffuse(1) * light.m_diffuse[1] * NdotL;
-                            color[2] += material->Diffuse(2) * light.m_diffuse[2] * NdotL;
+                            color[0] += baseDif[0] * light.m_diffuse[0] * NdotL;
+                            color[1] += baseDif[1] * light.m_diffuse[1] * NdotL;
+                            color[2] += baseDif[2] * light.m_diffuse[2] * NdotL;
 
                             // Specular term
                             CGrPoint H = Normalize3(L + V);

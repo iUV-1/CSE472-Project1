@@ -8,6 +8,7 @@
 #include "framework.h"
 #include "Project1.h"
 #include "ChildView.h"
+#include "graphics/GrTexture.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,18 +29,24 @@ CChildView::CChildView()
     redpaint->AmbientAndDiffuse(0.8f, 0.0f, 0.0f);
     scene->Child(redpaint);
 
+    CGrPtr<CGrTexture> marble = new CGrTexture;
+    marble->LoadFile(L"textures/marble02.bmp");
+
     CGrPtr<CGrComposite> redbox = new CGrComposite;
     redpaint->Child(redbox);
-    redbox->Box(1, 1, 1, 5, 5, 5);
+    redbox->Box(1, 1, 1, 5, 5, 5, marble);
 
     // A white box
     CGrPtr<CGrMaterial> whitepaint = new CGrMaterial;
     whitepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
     scene->Child(whitepaint);
 
+    CGrPtr<CGrTexture> plank = new CGrTexture;
+    plank->LoadFile(L"textures/plank01.bmp");
+
     CGrPtr<CGrComposite> whitebox = new CGrComposite;
     whitepaint->Child(whitebox);
-    whitebox->Box(-10, -10, -10, 5, 5, 5);
+    whitebox->Box(-10, -10, -10, 5, 5, 5, plank);
     m_raytrace = false;
 }
 
