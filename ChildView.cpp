@@ -41,8 +41,8 @@ CChildView::CChildView()
     // A white box
     CGrPtr<CGrMaterial> whitepaint = new CGrMaterial;
     whitepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
-    whitepaint->Specular(1.0f, 1.0f, 1.0f);
-    whitepaint->Shininess(120.0f);
+    whitepaint->Specular(0.1f, 0.1f, 0.1f);  // reduced specular for wood, so it won't reflect perfectly
+    whitepaint->Shininess(10.0f);
     scene->Child(whitepaint);
 
     CGrPtr<CGrTexture> plank = new CGrTexture;

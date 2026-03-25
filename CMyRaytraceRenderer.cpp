@@ -196,8 +196,13 @@ void CMyRaytraceRenderer::RayColor(const CRay& ray, double color[3], int recursi
                 double texG = row[u * 3 + 1] / 255.0;
                 double texB = row[u * 3 + 2] / 255.0;
 
-                baseAmb[0] = texR; baseAmb[1] = texG; baseAmb[2] = texB;
-                baseDif[0] = texR; baseDif[1] = texG; baseDif[2] = texB;
+                baseAmb[0] = baseAmb[0] * texR; 
+                baseAmb[1] = baseAmb[1] * texG; 
+                baseAmb[2] = baseAmb[2] * texB;
+
+                baseDif[0] = baseDif[0] * texR; 
+                baseDif[1] = baseDif[1] * texG; 
+                baseDif[2] = baseDif[2] * texB;
             }
 
             // color = compute-ambient-color
