@@ -9,6 +9,52 @@
 #include "Project1.h"
 #include "ChildView.h"
 #include "graphics/GrTexture.h"
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+void AddSphere(CGrComposite* comp, double cx, double cy, double cz, double r, int slices, int stacks, CGrTexture* texture = nullptr) {
+    for (int i = 0; i < stacks; i++) {
+        double lat0 = M_PI * (-0.5 + (double)(i) / stacks);
+        double y0  = r * sin(lat0);
+        double zr0 = r * cos(lat0);
+
+        double lat1 = M_PI * (-0.5 + (double)(i+1) / stacks);
+        double y1  = r * sin(lat1);
+        double zr1 = r * cos(lat1);
+
+        for (int j = 0; j < slices; j++) {
+            double lng0 = 2 * M_PI * (double)(j) / slices;
+            double x0 = zr0 * cos(lng0);
+            double z0 = zr0 * sin(lng0);
+
+            double lng1 = 2 * M_PI * (double)(j+1) / slices;
+            double x1 = zr0 * cos(lng1);
+            double z1 = zr0 * sin(lng1);
+
+            double x2 = zr1 * cos(lng1);
+            double z2 = zr1 * sin(lng1);
+
+            double x3 = zr1 * cos(lng0);
+            double z3 = zr1 * sin(lng0);
+
+            CGrPoint p0(cx + x0, cy + y0, cz + z0);
+            CGrPoint p1(cx + x1, cy + y0, cz + z1);
+            CGrPoint p2(cx + x2, cy + y1, cz + z2);
+            CGrPoint p3(cx + x3, cy + y1, cz + z3);
+
+            if (i == 0) {
+                comp->Poly3(p0, p3, p2, texture);
+            } else if (i == stacks - 1) {
+                comp->Poly3(p0, p3, p1, texture);
+            } else {
+                comp->Poly4(p0, p3, p2, p1, texture);
+            }
+        }
+    }
+}
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,6 +97,23 @@ CChildView::CChildView()
     CGrPtr<CGrComposite> whitebox = new CGrComposite;
     whitepaint->Child(whitebox);
     whitebox->Box(-10, -10, -10, 5, 5, 5, plank);
+
+    // A blue sphere
+    CGrPtr<CGrMaterial> bluepaint = new CGrMaterial;
+    // Ambient and diffuse is handled by texture mostly if present, but base color adds mod. Use white to keep texture colors.
+    bluepaint->AmbientAndDiffuse(0.8f, 0.8f, 0.8f);
+    bluepaint->Specular(0.9f, 0.9f, 0.9f);
+    bluepaint->Shininess(80.0f);
+    scene->Child(bluepaint);
+
+    CGrPtr<CGrTexture> worldmap = new CGrTexture;
+    worldmap->LoadFile(L"textures/worldmap.bmp");
+
+    CGrPtr<CGrComposite> spherecomp = new CGrComposite;
+    bluepaint->Child(spherecomp);
+
+    // AddSphere(comp, cx, cy, cz, r, slices, stacks, texture)
+    AddSphere(spherecomp, -4, 2, 8, 4, 30, 30, worldmap);
 
     // Provide a massive floor slightly beneath both boxes to catch their shadows safely!
     //CGrPtr<CGrMaterial> floorpaint = new CGrMaterial;
