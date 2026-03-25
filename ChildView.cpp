@@ -127,7 +127,7 @@ CChildView::CChildView()
     //floorpaint->Child(floorbox);
     //floorbox->Box(-50, -15, -50, 100, 2, 100);
 
-    AddSteve(scene, 24, -7, -8);
+    AddSteve(scene, 6, -7, 2);
     AddCrescentBardiche(scene, 15, -5, -4);
 
     m_raytrace = false;
