@@ -10,6 +10,7 @@
 #include "ChildView.h"
 #include "graphics/GrTexture.h"
 #include <cmath>
+#include "suisei.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -125,6 +126,9 @@ CChildView::CChildView()
     //CGrPtr<CGrComposite> floorbox = new CGrComposite;
     //floorpaint->Child(floorbox);
     //floorbox->Box(-50, -15, -50, 100, 2, 100);
+
+    AddSteve(scene, 24, -7, -8);
+    AddCrescentBardiche(scene, 15, -5, -4);
 
     m_raytrace = false;
 }
