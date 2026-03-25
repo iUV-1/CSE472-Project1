@@ -215,16 +215,12 @@ void CMyRaytraceRenderer::RayColor(const CRay& ray, double color[3], int recursi
             }
 
             CGrPoint V = Normalize3(-ray.Direction());
-            CGrTransform cameraMat;
-            cameraMat.SetLookAt(Eye().X(), Eye().Y(), Eye().Z(),
-                Center().X(), Center().Y(), Center().Z(),
-                Up().X(), Up().Y(), Up().Z());
 
             // foreach light
             for (int i = 0; i < LightCnt(); i++)
             {
                 const Light& light = GetLight(i);
-                CGrPoint lightPosCamera = cameraMat * light.m_pos;
+                CGrPoint lightPosCamera = m_mstack.back() * light.m_pos;
 
                 CGrPoint L;
                 double maxT;

@@ -28,7 +28,7 @@ CChildView::CChildView()
     CGrPtr<CGrMaterial> redpaint = new CGrMaterial;
     redpaint->AmbientAndDiffuse(0.8f, 0.0f, 0.0f);
     redpaint->Specular(0.8f, 0.8f, 0.8f);
-    redpaint->Shininess(100.0f);
+    redpaint->Shininess(40.0f);
     scene->Child(redpaint);
 
     CGrPtr<CGrTexture> marble = new CGrTexture;
@@ -53,15 +53,15 @@ CChildView::CChildView()
     whitebox->Box(-10, -10, -10, 5, 5, 5, plank);
 
     // Provide a massive floor slightly beneath both boxes to catch their shadows safely!
-    CGrPtr<CGrMaterial> floorpaint = new CGrMaterial;
-    floorpaint->AmbientAndDiffuse(0.6f, 0.6f, 0.6f);
-    floorpaint->Specular(0.2f, 0.2f, 0.2f);
-    floorpaint->Shininess(50.0f);
-    scene->Child(floorpaint);
-    
-    CGrPtr<CGrComposite> floorbox = new CGrComposite;
-    floorpaint->Child(floorbox);
-    floorbox->Box(-50, -15, -50, 100, 2, 100);
+    //CGrPtr<CGrMaterial> floorpaint = new CGrMaterial;
+    //floorpaint->AmbientAndDiffuse(0.6f, 0.6f, 0.6f);
+    //floorpaint->Specular(0.2f, 0.2f, 0.2f);
+    //floorpaint->Shininess(50.0f);
+    //scene->Child(floorpaint);
+    //
+    //CGrPtr<CGrComposite> floorbox = new CGrComposite;
+    //floorpaint->Child(floorbox);
+    //floorbox->Box(-50, -15, -50, 100, 2, 100);
 
     m_raytrace = false;
 }
